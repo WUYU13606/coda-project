@@ -654,7 +654,7 @@
         </div>
         <div class="chapter reveal">
             <div class="chapter-title">❸ 霸凌：当恶意找不到名字</div>
-            <button class="audio-btn play-chapter-audio" data-chapter="4">🎧 "学生时代的伤"</button>
+            <button class="audio-btn play-chapter-audio" data-chapter="4">🎧 学生时代的伤</button>
             <div class="chen-quote">"我最怕老师说：'让你爸妈来一趟'。不是怕挨骂，是怕——我要怎么用手语解释'校园欺凌'？最终只能翻译成：'老师说我最近表现不好。'"</div>
             <div class="split-layout">
                 <div class="split-left reveal reveal-left"><div class="bully-chart"><div id="bullyChart"></div></div></div>
@@ -1140,27 +1140,22 @@
                 }]
             });
 
-                        // ========== 弹窗 ==========
+                                    // ========== 弹窗 ==========
             const modal = document.getElementById('globalModal');
             document.getElementById('modalCloseBtn').onclick = () => modal.classList.remove('active');
             modal.onclick = (e) => { if (e.target === modal) modal.classList.remove('active'); };
 
             // ========== 音频播放 ==========
-            // 背景音乐（自动循环播放，旁白时不暂停）
             const bgMusic = new Audio('音乐.mp3');
             bgMusic.loop = true;
             bgMusic.volume = 0.3;
             
-            // 尝试自动播放
-            bgMusic.play().then(() => {
-                console.log('背景音乐已自动播放');
-            }).catch(() => {
+            bgMusic.play().catch(() => {
                 document.addEventListener('click', function autoPlayBg() {
                     bgMusic.play().catch(() => {});
                 }, { once: true });
             });
 
-            // 章节旁白音频映射
             const chapterAudioMap = {
                 'hero': '一.mp3',
                 '1': '二.mp3',
@@ -1172,7 +1167,6 @@
                 '7': '结尾诗.mp3'
             };
 
-            // 存储每个章节对应的音频对象
             const audioInstances = {};
             let currentPlayingKey = null;
 
@@ -1190,20 +1184,23 @@
                 return audioInstances[key];
             }
 
+            function stopCurrentAudio() {
+                if (currentPlayingKey) {
+                    const audio = audioInstances[currentPlayingKey];
+                    if (audio && !audio.paused) {
+                        audio.pause();
+                        audio.currentTime = 0;
+                    }
+                    currentPlayingKey = null;
+                }
+            }
+
             function toggleChapterAudio(chapterKey) {
                 const audio = getAudio(chapterKey);
                 if (!audio) return;
 
-                if (currentPlayingKey && currentPlayingKey !== chapterKey) {
-                    const prevAudio = audioInstances[currentPlayingKey];
-                    if (prevAudio) {
-                        prevAudio.pause();
-                        prevAudio.currentTime = 0;
-                    }
-                    currentPlayingKey = null;
-                }
-
                 if (audio.paused) {
+                    stopCurrentAudio();
                     audio.play().catch(() => {});
                     currentPlayingKey = chapterKey;
                 } else {
@@ -1214,15 +1211,9 @@
 
             function autoPlayChapter(chapterKey) {
                 if (currentPlayingKey === chapterKey) return;
+                stopCurrentAudio();
                 const audio = getAudio(chapterKey);
                 if (!audio) return;
-                if (currentPlayingKey && currentPlayingKey !== chapterKey) {
-                    const prevAudio = audioInstances[currentPlayingKey];
-                    if (prevAudio) {
-                        prevAudio.pause();
-                        prevAudio.currentTime = 0;
-                    }
-                }
                 audio.currentTime = 0;
                 audio.play().catch(() => {});
                 currentPlayingKey = chapterKey;
@@ -1261,26 +1252,28 @@
                         hasAutoPlayed[chapterKey] = true;
                         autoPlayChapter(chapterKey);
                     }
+
+                    if (!entry.isIntersecting && currentPlayingKey === chapterKey) {
+                        stopCurrentAudio();
+                    }
                 });
             }, { threshold: 0.5 });
 
             chapters.forEach(chapterEl => {
                 chapterObserver.observe(chapterEl);
             });
+
             if (heroSection) {
                 chapterObserver.observe(heroSection);
             }
 
-            // 监听结尾诗区域
             const endingSection = document.querySelector('.ending-poem');
             if (endingSection) {
                 endingSection.setAttribute('data-chapter', '7');
                 chapterObserver.observe(endingSection);
             }
 
-            // ========== 页面加载时自动播放 hero ==========
-
-            // ========== 页面加载时自动播放 hero ==========
+            // ========== 页面加载自动播放 hero ==========
             function tryAutoPlayHero() {
                 if (bgMusic.paused) {
                     bgMusic.play().catch(() => {});
@@ -1300,24 +1293,6 @@
                     bgMusic.play().catch(() => {});
                 }
                 tryAutoPlayHero();
-            }, { once: true });
-
-            // 如果浏览器阻止了自动播放，等用户第一次点击后再播
-            document.addEventListener('click', function playOnFirstClick() {
-                if (bgMusic.paused) {
-                    bgMusic.play().catch(() => {});
-                }
-                if (currentPlayingKey !== 'hero') {
-                    // 检查 hero 是否在视口内
-                    if (heroSection) {
-                        const heroRect = heroSection.getBoundingClientRect();
-                        const windowHeight = window.innerHeight;
-                        if (heroRect.top < windowHeight && heroRect.bottom > 0) {
-                            autoPlayChapter('hero');
-                            lastAutoPlayedChapter = 'hero';
-                        }
-                    }
-                }
             }, { once: true });
 
             // ========== 弹幕墙 ==========
