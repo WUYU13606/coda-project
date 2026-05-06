@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=5.0">
+    <title>那座桥 · CODA的寂静与声响 | 真实数据</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js">
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #faf7f0;
+            font-family: 'Noto Serif SC', 'Source Han Serif', '思源宋体', Georgia, 'Times New Roman', serif;
+            color: #2b2a27;
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 4rem;
+        }
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: opacity, transform;
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .reveal-fast {
+            transition-duration: 0.5s;
+        }
+        .reveal-slow {
+            transition-duration: 1.1s;
+        }
+        .reveal-left {
+            transform: translateX(-40px);
+        }
+        .reveal-left.visible {
+            transform: translateX(0);
+        }
+        .reveal-right {
+            transform: translateX(40px);
+        }
+        .reveal-right.visible {
+            transform: translateX(0);
+        }
+        .reveal-scale {
+            transform: scale(0.92);
+            opacity: 0;
+        }
+        .reveal-scale.visible {
+            transform: scale(1);
+            opacity: 1;
+        }
+        .hero {
+            min-height: 55vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 2rem 0;
+            border-bottom: 1px solid #e2d9cf;
+        }
+        h1 {
+            font-size: clamp(2.5rem, 7vw, 4rem);
+            font-weight: 450;
+            color: #4b3a2b;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+        .audio-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #f0e8de;
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            color: #7a6248;
+            margin: 1rem 0;
+            cursor: pointer;
+            width: fit-content;
+            border: none;
+            font-family: inherit;
+            transition: background 0.3s;
+        }
+        .audio-btn:hover {
+            background: #e5d9c8;
+        }
+        .chen-quote {
+            font-size: 1.2rem;
+            border-left: 4px solid #d6b17e;
+            padding-left: 1.5rem;
+            margin: 1.2rem 0;
+            color: #5d3e2b;
+        }
+        .quote-source {
+            font-size: 0.7rem;
+            color: #ad9882;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
+            border-left: none;
+            padding-left: 0;
+        }
+        .core-question {
+            font-size: 1.3rem;
+            font-weight: 400;
+            color: #b28b60;
+            background: rgba(40, 35, 28, 0.03);
+            padding: 1.2rem 1.8rem;
+            border-radius: 48px;
+            margin: 2rem 0;
+            text-align: center;
+            border: 1px solid #e6d9ca;
+        }
+        .chapter {
+            margin: 4rem 0 2.5rem;
+        }
+        .chapter-title {
+            font-size: 1.5rem;
+            font-weight: 450;
+            color: #4a3725;
+            border-left: 5px solid #d6b17e;
+            padding-left: 1rem;
+            margin-bottom: 1rem;
+        }
+        .split-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3rem;
+            margin: 1.5rem 0;
+            align-items: center;
+        }
+        .split-left {
+            flex: 1.2;
+            min-width: 280px;
+        }
+        .split-right {
+            flex: 0.9;
+            min-width: 250px;
+            text-align: center;
+            font-family: 'Noto Serif SC', 'Source Han Serif', '思源宋体', Georgia, 'Times New Roman', serif;
+            font-size: 1rem;
+            line-height: 1.8;
+            color: #2b2a27;
+        }
+        .split-right p {
+            margin-bottom: 1rem;
+        }
+        .insight {
+            margin: 1.5rem 0;
+            padding-left: 1rem;
+            border-left: 3px solid #d6b17e;
+            color: #6b5a48;
+            font-style: italic;
+        }
+        .crowd-section {
+            margin: 2rem 0;
+        }
+        .people-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 6px;
+            margin: 1.5rem 0;
+            max-height: 420px;
+            overflow-y: auto;
+            padding: 1rem 0.5rem;
+            background: #fef9f2;
+            border-radius: 32px;
+        }
+        .person-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: 500;
+            cursor: pointer;
+            background: #e2d6ca;
+            border: 1px solid #cfc1b0;
+            transition: transform 0.25s, box-shadow 0.25s;
+        }
+        .person-icon:hover {
+            transform: scale(1.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 5;
+        }
+        .person-translator {
+            box-shadow: 0 0 0 2px #d4a017, 0 0 0 4px #f5e6c8;
+        }
+        .emotion-positive {
+            background: #e6c88f;
+        }
+        .emotion-negative {
+            background: #b8a793;
+        }
+        .emotion-mixed {
+            background: #c9af87;
+        }
+        .legend-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.2rem;
+            font-size: 0.7rem;
+            margin: 1rem 0;
+        }
+        #sceneNetworkContainer {
+            width: 100%;
+            height: 480px;
+            background: transparent;
+            border-radius: 24px;
+            overflow: hidden;
+            position: relative;
+        }
+        #sceneCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: pointer;
+        }
+        .scene-tooltip {
+            position: absolute;
+            background: #0a0f1fdd;
+            backdrop-filter: blur(12px);
+            color: #f1f5f9;
+            padding: 12px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            max-width: 260px;
+            box-shadow: 0 16px 24px rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(214, 177, 126, 0.4);
+            line-height: 1.5;
+            font-family: 'Noto Serif SC', 'Source Han Serif', '思源宋体', Georgia, 'Times New Roman', serif;
+        }
+        .scene-tooltip strong {
+            color: #FFD966;
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .emotion-chart {
+            margin: 1rem 0;
+        }
+        .emotion-bar-item {
+            margin: 0.8rem 0;
+        }
+        .emotion-bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+            color: #4a3725;
+        }
+        .emotion-bar-track {
+            height: 32px;
+            background: #e8e0d4;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .emotion-bar-fill {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 8px;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 500;
+            transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .bully-chart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #bullyChart {
+            width: 100%;
+            height: 320px;
+        }
+        
+        /* ========== 职业图表新布局：左侧为竖起来的图表，右侧为文字说明 ========== */
+        .career-wrapper {
+            margin: 1.5rem 0;
+        }
+        .career-split {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            align-items: center;
+            margin: 1.5rem 0;
+        }
+        .career-chart-col {
+            flex: 1;
+            min-width: 280px;
+            height: 520px;
+        }
+        #careerChart {
+            width: 100%;
+            height: 100%;
+        }
+        .career-text-col {
+            flex: 0.9;
+            min-width: 240px;
+            text-align: center;
+            font-family: 'Noto Serif SC', 'Source Han Serif', '思源宋体', Georgia, 'Times New Roman', serif;
+            color: #5d3e2b;
+            line-height: 1.8;
+            font-size: 0.95rem;
+        }
+        .career-text-col p {
+            margin: 0.3rem 0;
+        }
+        .career-text-col .career-hint {
+            font-size: 0.75rem;
+            color: #8b7355;
+            margin-bottom: 0.8rem;
+        }
+        /* ========== 职业图表新布局结束 ========== */
+
+        .emotion-network-wrapper {
+            margin: 2rem 0;
+        }
+        .network-control-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .count-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f0e8de;
+            padding: 5px 15px;
+            border-radius: 40px;
+        }
+        .count-control label {
+            font-size: 0.75rem;
+            color: #7a6248;
+        }
+        .count-slider {
+            width: 160px;
+            height: 3px;
+            -webkit-appearance: none;
+            background: #d4cfc5;
+            border-radius: 3px;
+        }
+        .count-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #d6b17e;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .slider-value {
+            font-size: 0.7rem;
+            color: #b57c48;
+            min-width: 35px;
+        }
+        .show-labels-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f0e8de;
+            padding: 5px 15px;
+            border-radius: 40px;
+        }
+        .show-labels-toggle label {
+            font-size: 0.75rem;
+            color: #7a6248;
+            cursor: pointer;
+        }
+        .stats-mini {
+            font-size: 0.7rem;
+            color: #ad9882;
+            background: #f0e8de;
+            padding: 5px 12px;
+            border-radius: 40px;
+        }
+        #emotionGraph {
+            width: 100%;
+            height: 520px;
+            background: #fefaf4;
+            border-radius: 24px;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .modal.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal-card {
+            background: #fffcf5;
+            max-width: 460px;
+            width: 85%;
+            border-radius: 48px;
+            padding: 1.8rem;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s;
+        }
+        .modal.active .modal-card {
+            transform: translateY(0);
+        }
+        .modal-close {
+            position: absolute;
+            right: 18px;
+            top: 14px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #b58b60;
+            transition: color 0.2s;
+        }
+        .modal-close:hover {
+            color: #8b5a2b;
+        }
+        .modal-quote {
+            background: #f3ede4;
+            padding: 1rem;
+            border-radius: 24px;
+            margin: 1rem 0;
+            font-style: italic;
+            font-size: 0.9rem;
+            max-height: 200px;
+            overflow-y: auto;
+            color: #5d3e2b;
+            line-height: 1.6;
+        }
+        footer {
+            margin-top: 3rem;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #ad9882;
+            border-top: 1px solid #e3d5c6;
+            padding-top: 2rem;
+            line-height: 1.8;
+        }
+        .ending-poem {
+            text-align: center;
+            margin: 2rem 0 1rem 0;
+            font-family: 'Noto Serif SC', 'Source Han Serif', '思源宋体', Georgia, 'Times New Roman', serif;
+            color: #5d3e2b;
+            line-height: 2;
+            font-size: 1.1rem;
+        }
+        .bullet-screen-section {
+            margin: 1rem 0 0.5rem 0;
+            width: 100%;
+            height: 260px;
+            max-height: 33vh;
+            min-height: 220px;
+            position: relative;
+            background: transparent;
+            overflow: hidden;
+            border-radius: 24px;
+        }
+        #bullet-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            background: transparent;
+            font-family: system-ui, 'Segoe UI', 'Noto Sans SC', 'PingFang SC', 'Helvetica Neue', sans-serif;
+        }
+        .scroll-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            z-index: 999;
+            pointer-events: none;
+        }
+        .scroll-indicator-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #d6b17e, #c49a6c);
+            width: 0%;
+            transition: width 0.15s linear;
+            border-radius: 0 3px 3px 0;
+        }
+        .data-card {
+            background: #fffcf5;
+            border-radius: 32px;
+            padding: 1.8rem 1.5rem;
+            margin: 1.8rem 0;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+            border: 1px solid #e8d9ca;
+            text-align: center;
+        }
+        .data-row {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            padding: 0.9rem 0;
+            border-bottom: 1px dashed #e2d9cf;
+        }
+        .data-row:last-child {
+            border-bottom: none;
+        }
+        .data-label {
+            font-size: 1rem;
+            color: #5d3e2b;
+            font-weight: 450;
+            width: 120px;
+            text-align: right;
+            padding-right: 1.5rem;
+        }
+        .data-value {
+            font-weight: 700;
+            color: #1a1a1a;
+            letter-spacing: -0.02em;
+            text-align: left;
+            font-size: 1rem;
+        }
+        .data-row:nth-child(1) .data-value {
+            font-size: 2.5rem;
+            color: #2b2a27;
+        }
+        .data-row:nth-child(2) .data-value {
+            font-size: 1.5rem;
+            color: #c5603a;
+        }
+        .data-row:nth-child(3) .data-value {
+            font-size: 0.95rem;
+            color: #b5343a;
+        }
+        .data-unit {
+            font-size: inherit;
+            color: #1a1a1a;
+            margin-left: 3px;
+            font-weight: 400;
+        }
+        .data-note {
+            margin-top: 1.2rem;
+            font-size: 0.7rem;
+            color: #ad9882;
+            text-align: center;
+            border-top: 1px solid #f0e8de;
+            padding-top: 0.9rem;
+        }
+        .center-quote {
+            text-align: center;
+            font-size: 1.2rem;
+            margin: 1.2rem 0;
+            color: #5d3e2b;
+        }
+        @media (max-width: 768px) {
+            .split-layout {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            .career-split {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            .career-chart-col {
+                height: 400px;
+            }
+            #sceneNetworkContainer {
+                height: 380px;
+            }
+            #emotionGraph {
+                height: 420px;
+            }
+            #bullyChart {
+                height: 280px;
+            }
+            .bullet-screen-section {
+                height: 220px;
+                max-height: 28vh;
+                min-height: 180px;
+            }
+            .data-label {
+                width: 100px;
+                padding-right: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="scroll-indicator">
+        <div class="scroll-indicator-fill" id="scrollProgress"></div>
+    </div>
+    <div class="container">
+        <!-- ===== 英雄区、章节1-4 保持不变 ===== -->
+        <div class="hero reveal">
+            <h1>那座桥，不只一个人<br>一个CODA女孩的成长手记</h1>
+            <button class="audio-btn" id="playHeroAudio">🎧 播放旁白·陈星</button>
+            <div class="chen-quote">"你可能不知道，每100个聋人家庭里，就有超过90个听力正常的孩子——我们叫自己CODA。我不是一个数据，我是陈星，一个在寂静与声响之间长大的女孩。"</div>
+            <div class="quote-source">数据来源：Addressing the Trauma Treatment Needs of Children Who Are Deaf or Hard of Hearing and the Hearing Children of Deaf Parents</div>
+            <div class="core-question reveal reveal-slow">❓ 当一个孩子成为父母与世界之间的"翻译"，这意味着什么？<br>——123位CODA的真实回答</div>
+        </div>
+        <div class="chapter reveal">
+            <div class="chapter-title">❶ 谁在翻译沉默？</div>
+            <button class="audio-btn play-chapter-audio" data-chapter="1">🎧 3岁半的菜市场</button>
+            <div class="chen-quote">"我学会的第一个'句子'不是'爸爸妈妈'，而是'这个多少钱'。拽着妈妈的衣角，仰头对卖菜阿姨说：'妈妈说，土豆能不能便宜点？'那是我第一次明白，我的声音，也是他们的声音。"</div>
+            <p>在123位CODA的真实自述中，<strong>31人明确从童年起就承担家庭翻译角色。</strong></p>
+            <div class="insight reveal reveal-left">他们不是天生早熟。是生活，让他们提前站到了两个世界的交界处。</div>
+        </div>
+        <div class="crowd-section reveal reveal-scale">
+            <div class="legend-bar"><span>🟡正面情绪</span><span>⚫负面情绪</span><span>🟤矛盾情绪</span><span>✨金色边框=承担翻译者</span></div>
+            <div class="people-grid" id="peopleGridFull"></div>
+            <p style="text-align:center;font-size:0.7rem;">👆点击任意小圆，看他们的故事</p>
+        </div>
+        <div class="chapter reveal">
+            <div class="chapter-title">❷ 翻译场景：站在交界处的童年</div>
+            <button class="audio-btn play-chapter-audio" data-chapter="2">🎧 12岁医院的奔跑</button>
+            <div class="chen-quote">"12岁那年，我独自带爸爸去医院。在诊室和缴费窗口之间跑来跑去，手里攥着单子，手上比划着爸爸的疑问。那天晚上，我在日记本上画了一座歪歪扭扭的桥。"</div>
+            <div class="split-layout">
+                <div class="split-left reveal reveal-left">
+                    <div id="sceneNetworkContainer"><canvas id="sceneCanvas"></canvas><div class="scene-tooltip" id="sceneTooltip"></div></div>
+                </div>
+                <div class="split-right reveal reveal-right">
+                    <p>从菜市场到手术室，<br>从银行柜台到家长会——</p>
+                    <p>这些孩子走过的场景，<br>远比同龄人想象的复杂。</p>
+                    <p>每一个场景，都是一根绳索。<br>绳索不重，<br>但捆在一起，<br>就成了他们无法挣脱的网。</p>
+                </div>
+            </div>
+            <div class="insight reveal">在这31位CODA中，他们的翻译大部分发生在日常——菜市场、家里、街坊邻里的闲聊。当他们带着父母的声音走进成人世界，有时随之而来的不是理解，是恶意。</div>
+        </div>
+        <div class="chapter reveal">
+            <div class="chapter-title">❸ 霸凌：当恶意找不到名字</div>
+            <button class="audio-btn play-chapter-audio" data-chapter="4">🎧 "学生时代的伤"</button>
+            <div class="chen-quote">"我最怕老师说：'让你爸妈来一趟'。不是怕挨骂，是怕——我要怎么用手语解释'校园欺凌'？最终只能翻译成：'老师说我最近表现不好。'"</div>
+            <div class="split-layout">
+                <div class="split-left reveal reveal-left"><div class="bully-chart"><div id="bullyChart"></div></div></div>
+                <div class="split-right reveal reveal-right"><p>23人写下被霸凌的经历，<br>94人选择了沉默。</p><p>他们独自吞咽恶意，<br>回到家后，却无法用手语<br>把"我被欺负了"翻译给父母。</p></div>
+            </div>
+            <div class="insight reveal">霸凌的伤疤不总是看得见。23个人写下了它，94个人没有。写下的那23个人，说的都是真的。一段完整的叙事，不需要用大多数人的光亮，去覆盖少数人的暗处。</div>
+        </div>
+        <div class="chapter reveal">
+            <div class="chapter-title">❹ 情绪光谱：骄傲与委屈从不互斥</div>
+            <button class="audio-btn play-chapter-audio" data-chapter="3">🎧 日记本上的桥</button>
+            <div class="chen-quote">"那些年，我需要被需要，也渴望被理解。长大后我才明白，真正的长大，不是抛弃任何一种情绪，而是让它们同时存在。"</div>
+            <div class="split-layout">
+                <div class="split-left reveal reveal-left">
+                    <div class="emotion-chart">
+                        <p><strong>123位CODA的情绪表达统计</strong></p>
+                        <div class="emotion-bar-item"><div class="emotion-bar-label"><span>😊正面情绪</span><span id="positiveCount">—</span></div><div class="emotion-bar-track"><div id="positiveBar" class="emotion-bar-fill" style="background:#e6c88f;width:0%;">0</div></div></div>
+                        <div class="emotion-bar-item"><div class="emotion-bar-label"><span>😞负面情绪</span><span id="negativeCount">—</span></div><div class="emotion-bar-track"><div id="negativeBar" class="emotion-bar-fill" style="background:#b8a793;width:0%;">0</div></div></div>
+                        <div class="emotion-bar-item"><div class="emotion-bar-label"><span>🫂矛盾情绪</span><span id="mixedCount">—</span></div><div class="emotion-bar-track"><div id="mixedBar" class="emotion-bar-fill" style="background:#c9af87;width:0%;">0</div></div></div>
+                        <div class="emotion-bar-item"><div class="emotion-bar-label"><span>❓未提及</span><span id="unknownCount">—</span></div><div class="emotion-bar-track"><div id="unknownBar" class="emotion-bar-fill" style="background:#d4cfc5;width:0%;">0</div></div></div>
+                    </div>
+                </div>
+                <div class="split-right reveal reveal-right">
+                    <p>123个真实的声音里<br>53.7%的人说"我很骄傲""我很爱我的父母"。</p>
+                    <p>17.1%的人，表达了负面情绪。<br>他们的痛苦同样真实，不需要被稀释。</p>
+                    <p>还有近三成的人，<br>要么在骄傲和委屈之间摇摆，<br>要么选择了不把情绪写进回答——<br>这种沉默本身，也是一种表达。</p>
+                </div>
+            </div>
+            <div class="insight reveal">"正面"不等于轻松。许多说"我骄傲"的CODA，也曾在被子里哭过。"负面"也不等于没有爱。一个人的内心，容得下这两种东西同时为真。</div>
+            <div class="emotion-network-wrapper reveal reveal-scale">
+                <div class="network-control-bar">
+                    <div class="count-control"><label>📊 出现次数 ≥</label><input type="range" min="1" max="54" value="1" class="count-slider" id="countSlider"><span class="slider-value" id="currentCountVal">1</span></div>
+                    <div class="show-labels-toggle"><input type="checkbox" id="showLabelsCheckbox" checked><label>显示词汇标签</label></div>
+                    <div class="stats-mini">📊 <span id="displayWordsCount">0</span> / <span id="totalWordsCount">0</span> 词汇</div>
+                </div>
+                <div id="emotionGraph"></div>
+                <div class="insight" style="margin-top:0.8rem;">💡 "希望"与"爱"排在最前面，"自卑"紧随其后——这不是一组互相抵消的数据，这是一组互相说明的数据。CODA的情感世界不是单色的，而这些颜色，最终也被他们带进了各自的道路中。</div>
+            </div>
+        </div>
+
+        <!-- ===== ❺ 职业选择：拆分左右布局，图表纵向 ===== -->
+        <div class="chapter reveal">
+            <div class="chapter-title">❺ 职业选择： 桥的另一端是未来</div>
+            <button class="audio-btn play-chapter-audio" data-chapter="5">🎧 25岁，我成了一名手语翻译</button>
+            <div class="chen-quote">"25岁，我成了一名手语翻译。朋友笑我：'你这是把家庭作业做成了事业啊。'我想了想，说：'不是家庭作业，是我自己选的路。'"</div>
+            
+            <!-- 新布局：左侧图表，右侧文字 -->
+            <div class="career-split reveal reveal-scale">
+                <div class="career-chart-col">
+                    <div id="careerChart"></div>
+                </div>
+                <div class="career-text-col">
+                    <p class="career-hint">💡 从下到上：与CODA经历相关度递增<br>从业人数越多，气泡越大</p>
+                    <p>这些职业数据，</p>
+                    <p>讲述的其实是一个关于"选择"的故事。</p>
+                    <p>有些人继续站在两个世界的交界处，</p>
+                    <p>把自己活成了一座桥。</p>
+                    <p>这值得被看见。</p>
+                    <p>&nbsp;</p>
+                    <p>有些人走向了完全不同的方向</p>
+                    <p>——金融、保险、美食</p>
+                    <p>童年那座桥没有成为他们的职业，</p>
+                    <p>但也没有成为他们的枷锁。这同样值得被看见。</p>
+                    <p>不是每一个CODA都会成为翻译。</p>
+                    <p>那段经历可能是一颗种子，</p>
+                    <p>也可能只是一段经历。</p>
+                    <p>两种可能，都是自由的。</p>
+                </div>
+            </div>
+            <div class="insight reveal">123位CODA中，只有17人提及了职业。更多的人还在路上，更多的人选择了沉默。我们不知道沉默里的故事是什么，但我们至少可以做到：不替他们写结局。</div>
+        </div>
+
+        <!-- ===== ❻ 以及后续内容保持不变 ===== -->
+        <div class="chapter reveal">
+            <div class="chapter-title">❻  2850:1 的反思</div>
+            <button class="audio-btn play-chapter-audio" data-chapter="6">🎧 手术室门口</button>
+            <div class="chen-quote">"去年爸爸做手术，医院没有手语翻译。我请了假守在病床前，把医生的每句话翻译给他。他握了握我的手——就像二十年前在菜市场那样。"</div>
+            <div class="data-card reveal reveal-scale">
+                <div class="data-row"><span class="data-label">聋人</span><span class="data-value">2850<span class="data-unit">万</span></span></div>
+                <div class="data-row"><span class="data-label">手语翻译</span><span class="data-value">不足1<span class="data-unit">万</span></span></div>
+                <div class="data-row"><span class="data-label">手语律师</span><span class="data-value">不足20<span class="data-unit">人</span></span></div>
+                <div class="data-note">数据来源：香港《文匯報》</div>
+            </div>
+            <div class="center-quote">这不是一个家庭的问题。</div>
+            <button class="audio-btn play-chapter-audio" data-chapter="7" style="margin: 1rem auto; display: flex;">🎧 播放结尾诗</button>
+            <div class="ending-poem reveal reveal-slow">
+                <p>我是陈星，一个CODA</p><p>我是一座桥，生在寂静与声响之间</p><p>我只希望——</p><p>未来有更多桥被建起</p><p>更多声音被听见</p><p>更多选择被尊重</p><p>而我们</p><p>可以只是女儿、儿子</p><p>而不是永远的"翻译官"。</p>
+            </div>
+            <div class="bullet-screen-section reveal reveal-scale"><div id="bullet-container"></div></div>
+        </div>
+        <footer class="reveal">*123份真实CODA自述、访谈数据。陈星的故事为集体叙事而作，献给所有在沉默与声音之间长大的孩子。<br>她的经历，来自他们的讲述。她的情绪，不止一种。他们的答案，也一样。</footer>
+    </div>
+
+    <div id="globalModal" class="modal">
+        <div class="modal-card"><div class="modal-close" id="modalCloseBtn">✕</div><div id="modalContent"></div></div>
+    </div>
+
+    <script>
+        (function() {
+            // ========== 真实人物数据 ==========
+            const realPeople = [
+                { id: 1, trans: true, emotion: '矛盾', bullied: '是', quote: '经常因沟通差异被打或被骂；家长会没人出席被批评；同学嘲笑' },
+                { id: 2, trans: false, emotion: '矛盾', bullied: '是', quote: '坚强；被嘲笑；自卑敏感；使命' },
+                { id: 3, trans: false, emotion: '正面', bullied: '未提及', quote: '手语翻译；身份认同：抗拒→铠甲' },
+                { id: 4, trans: true, emotion: '正面', bullied: '未提及', quote: '香港；手语母语者；和弟弟都语言发展缓慢；曾经自卑，社工辅助后适应' }, { id: 5, trans: true, emotion: '正面', bullied: '未提及', quote: '很开心，感觉温暖了家人' },
+                { id: 6, trans: false, emotion: '未提及', bullied: '未提及', quote: '四岁，与父母手语沟通，与爷爷奶奶油嘴滑舌' }, { id: 7, trans: false, emotion: '正面', bullied: '是', quote: '小时候被同学嘲笑"小哑巴"，与同学打架；帮助聋人就业' },
+                { id: 8, trans: false, emotion: '负面', bullied: '未提及', quote: '幼儿园；手语母语者；认识到父母的不同后变得孤僻、自卑' }, { id: 9, trans: false, emotion: '正面', bullied: '未提及', quote: '骄傲；觉得幸福；偶尔因为与父母沟通不好发脾气，但后悔、改正态度' },
+                { id: 10, trans: false, emotion: '矛盾', bullied: '未提及', quote: '迷茫' }, { id: 11, trans: false, emotion: '未提及', bullied: '未提及', quote: '累，自卑' }, { id: 12, trans: true, emotion: '正面', bullied: '未提及', quote: '开家长会自卑；拒绝到接纳；温暖幸福；爱；想助残扶残；使命' },
+                { id: 13, trans: false, emotion: '正面', bullied: '未提及', quote: '以自身的成功，鼓励聋人家庭的孩子积极向上；金融' }, { id: 14, trans: false, emotion: '正面', bullied: '未提及', quote: '小时候街上不自在' }, { id: 15, trans: false, emotion: '正面', bullied: '未提及', quote: '精神富足；爱' },
+                { id: 16, trans: false, emotion: '矛盾', bullied: '未提及', quote: '从小感到无助；哭，发泄' }, { id: 17, trans: false, emotion: '负面', bullied: '是', quote: '自卑；被打；被骂哑巴；父母不管；社会上胆小、逃避性格' }, { id: 18, trans: false, emotion: '矛盾', bullied: '未提及', quote: '自卑' },
+                { id: 19, trans: false, emotion: '矛盾', bullied: '未提及', quote: '八岁；会五种语言；勇敢承认父母聋人；觉得父母参加学校活动尴尬；爱爸爸妈妈' }, { id: 20, trans: false, emotion: '负面', bullied: '未提及', quote: '对不起，我做不到' }, { id: 21, trans: false, emotion: '矛盾', bullied: '未提及', quote: '埋怨自己，想让父母过上更好的生活' },
+                { id: 22, trans: false, emotion: '正面', bullied: '未提及', quote: '以前抱怨，后来懊恼没有办法给父母好的生活' }, { id: 23, trans: false, emotion: '正面', bullied: '未提及', quote: '感恩；自责自己没有多陪陪父母' }, { id: 24, trans: false, emotion: '正面', bullied: '是', quote: '被嘲笑勇敢反击；提到微信视频；希望有无人驾驶汽车' },
+                { id: 25, trans: true, emotion: '负面', bullied: '未提及', quote: '幸福；自卑；婚恋歧视；强自尊心；承受的比同龄人多；养老保险' }, { id: 26, trans: false, emotion: '负面', bullied: '未提及', quote: '被迫处理事情；沟通成本高；被迫成长；很痛苦' }, { id: 27, trans: false, emotion: '负面', bullied: '未提及', quote: '对家人失去期待' },
+                { id: 28, trans: false, emotion: '负面', bullied: '未提及', quote: '难沟通；自己处理学校事情' }, { id: 29, trans: false, emotion: '未提及', bullied: '是', quote: '很小就被骂哑巴的孩子；在学校一直遭受肢体霸凌；苦不堪言；自卑，不敢谈恋爱' }, { id: 30, trans: false, emotion: '未提及', bullied: '未提及', quote: '性格温暖；留在父母身边' },
+                { id: 31, trans: false, emotion: '负面', bullied: '未提及', quote: '难沟通' }, { id: 32, trans: false, emotion: '未提及', bullied: '未提及', quote: '认知错误；上小学后才意识到自己是健听人' }, { id: 33, trans: false, emotion: '正面', bullied: '是', quote: '小时候被嘲笑；自卑；乐观开朗；爱' },
+                { id: 34, trans: false, emotion: '矛盾', bullied: '未提及', quote: '自卑；很烦；难受；不喜欢被看；开家长会说姑姑是妈妈；长大后想明白' }, { id: 35, trans: false, emotion: '正面', bullied: '是', quote: '无力；自卑；被排挤；婚恋问题；痛苦 + 自我和解' }, { id: 36, trans: false, emotion: '未提及', bullied: '未提及', quote: '从小一帆风顺，长大后婚恋问题' },
+                { id: 37, trans: false, emotion: '负面', bullied: '未提及', quote: '想脱离；沟通费劲；相当孤儿' }, { id: 38, trans: false, emotion: '正面', bullied: '未提及', quote: '有很多不方便；与父母相互爱着彼此' }, { id: 39, trans: false, emotion: '未提及', bullied: '未提及', quote: '一切都只能依靠自己' },
+                { id: 40, trans: false, emotion: '未提及', bullied: '未提及', quote: '父母给的不比别人少；不埋怨上天不公' }, { id: 41, trans: false, emotion: '矛盾', bullied: '未提及', quote: '婚恋问题；心疼聋哑早逝的母亲；不埋怨任何人；且行且珍惜' }, { id: 42, trans: false, emotion: '正面', bullied: '未提及', quote: '比普通人成熟很多；"不要去在乎你得到什么，在乎你能给出去什么"' },
+                { id: 43, trans: false, emotion: '负面', bullied: '是', quote: '心理不健康；周围人嘲笑讽刺' }, { id: 44, trans: false, emotion: '未提及', bullied: '是', quote: '自卑；奶奶带大；小时候被同学欺负' }, { id: 45, trans: false, emotion: '未提及', bullied: '未提及', quote: '与他人相处不自在；不敢直视对方' },
+                { id: 46, trans: false, emotion: '正面', bullied: '未提及', quote: '手语交流；曾经嫌弃跟父母上街，觉得尴尬；愧疚对父母的陪伴少' }, { id: 47, trans: false, emotion: '未提及', bullied: '未提及', quote: '不怎么跟父母在一起；父母文化低；不好沟通；没办法教父亲用手机；担心养老问题' }, { id: 48, trans: true, emotion: '未提及', bullied: '未提及', quote: '现在我在异地读大学家里宽带坏了，他们都没办法正常报修……' },
+                { id: 49, trans: true, emotion: '矛盾', bullied: '是', quote: '父母不管；手语能力有限；被排挤欺负，对同学打回去；无奈被迫接受；帮父母找工作；父母就医麻烦' }, { id: 50, trans: true, emotion: '正面', bullied: '未提及', quote: '习惯他人目光；长大后正式学习手语；结交聋人朋友并介绍给父母' },
+                { id: 51, trans: false, emotion: '正面', bullied: '未提及', quote: '从未嫌弃父母；敏感' }, { id: 52, trans: false, emotion: '负面', bullied: '未提及', quote: '从小内向不说话' }, { id: 53, trans: false, emotion: '负面', bullied: '未提及', quote: '性格不和；沟通有限' }, { id: 54, trans: false, emotion: '正面', bullied: '未提及', quote: '认为父母不容易' }, { id: 55, trans: false, emotion: '正面', bullied: '未提及', quote: '自卑；不自在；会简单手语；微信沟通' },
+                { id: 56, trans: false, emotion: '矛盾', bullied: '是', quote: '16岁；外公带大；不太会手语；自卑；被嘲笑；无人依靠；辍学；图书馆志愿者' }, { id: 57, trans: false, emotion: '正面', bullied: '未提及', quote: '接受尊重；自信；成长中没有父母的出席；总有一天我们会变成最好的自己' }, { id: 58, trans: false, emotion: '正面', bullied: '未提及', quote: '接受尊重；自信' },
+                { id: 59, trans: false, emotion: '正面', bullied: '未提及', quote: '12岁；手语和微信沟通；与父母缺乏沟通；"我要维护我的爸爸妈妈"' }, { id: 60, trans: false, emotion: '负面', bullied: '未提及', quote: '16岁；爷爷奶奶带大；习惯口语；沟通鸿沟；孤独无助；熟悉的陌生人' },
+                { id: 61, trans: true, emotion: '矛盾', bullied: '是', quote: '孤立无援；会简单手语；8岁成为生病弟弟的照顾者；"没有期待，不会被爱"' }, { id: 62, trans: true, emotion: '负面', bullied: '是', quote: '外公外婆照顾抚育；学前孤独；上学被孤立嘲笑；结婚时对方父母不同意；特殊教育工作' },
+                { id: 63, trans: true, emotion: '正面', bullied: '未提及', quote: '19岁；七八岁开始为父母翻译，帮助问路、点菜；父母关心' }, { id: 64, trans: false, emotion: '矛盾', bullied: '否', quote: '"我不接受自己是聋人家庭的孩子"；被人喊做"哑巴女儿"；胆怯孤僻；幼儿园教师' },
+                { id: 65, trans: true, emotion: '正面', bullied: '未提及', quote: '从小翻译；"去到柜台，我要踮起脚才勉强见到职员"；很自豪；手语传译员' }, { id: 66, trans: true, emotion: '正面', bullied: '未提及', quote: '青春期时感到羞耻和厌烦；"今天，我感到骄傲。我爱他们。"手语戏剧表演' },
+                { id: 67, trans: false, emotion: '正面', bullied: '未提及', quote: '小时候有些自卑；大学加入手语社团；"我的父母永远是我生活的一部分"' }, { id: 68, trans: true, emotion: '正面', bullied: '未提及', quote: '两岁开始学手语；当父母翻译；"我爸爸妈妈很厉害，像超人一样"' }, { id: 69, trans: true, emotion: '负面', bullied: '未提及', quote: '沟通困难；父母爱面子不懂装懂；"要疯了"' }, { id: 70, trans: true, emotion: '正面', bullied: '未提及', quote: '9岁；独立自主；"我想上好大学，然后照顾我爸爸妈妈"' },
+                { id: 71, trans: true, emotion: '正面', bullied: '未提及', quote: '家长会翻译；"（父母）给我的爱非常非常的满"；最美"00后"手语翻译' }, { id: 72, trans: true, emotion: '未提及', bullied: '未提及', quote: '手语为第一语言；四五岁就开始手语翻译' }, { id: 73, trans: true, emotion: '正面', bullied: '是', quote: '一到五岁学手语；小学被排挤；父亲住院当翻译；美食博主' },
+                { id: 74, trans: true, emotion: '正面', bullied: '未提及', quote: '"没有童年，没有叛逆期"；"自己从小都是在背负一个翻译者的角色"；手语翻译' }, { id: 75, trans: true, emotion: '正面', bullied: '未提及', quote: '成长是一段孤独的旅程；"希望能成为推动这两个世界融合的力量"' },
+                { id: 76, trans: false, emotion: '正面', bullied: '未提及', quote: '"为了给父母创造些更好的生活条件，我也应该多努努力"' }, { id: 77, trans: true, emotion: '矛盾', bullied: '未提及', quote: '父亲骨髓纤维化和心梗，母亲精神疾病；家庭顶梁柱；"什么都是一个人去做，太难了"' }, { id: 78, trans: false, emotion: '未提及', bullied: '是', quote: '小学被同学嘲笑；婚恋问题' },
+                { id: 79, trans: false, emotion: '正面', bullied: '未提及', quote: '"作为子女，要努力，要好好报答他们"' }, { id: 80, trans: true, emotion: '正面', bullied: '未提及', quote: '日常手语交流；从小当翻译官；心疼父母' }, { id: 81, trans: true, emotion: '正面', bullied: '未提及', quote: '长大搬出去住以后关系才密切；"他们很爱我很照顾我"' }, { id: 82, trans: false, emotion: '正面', bullied: '未提及', quote: '20岁；心疼父母；"没什么大不了的"' },
+                { id: 83, trans: false, emotion: '负面', bullied: '未提及', quote: '性格不合；语言障碍；沟通有限；有事自己憋心里' }, { id: 84, trans: false, emotion: '正面', bullied: '未提及', quote: '四岁因目睹父亲就医困难开始学习手语；成为手语律师' }, { id: 85, trans: false, emotion: '负面', bullied: '未提及', quote: '自卑，绝望和难过；"我真的害怕，我没有勇气"' },
+                { id: 86, trans: false, emotion: '正面', bullied: '未提及', quote: '爷爷奶奶带大；和父母没什么交流；婚后"觉得妈妈很可怜"' }, { id: 87, trans: true, emotion: '未提及', bullied: '未提及', quote: '"野生翻译"；帮家里解决问题，也帮助父母的朋友到医院看病' }, { id: 88, trans: false, emotion: '正面', bullied: '未提及', quote: '觉得没事；"我（拥有）的母爱不亚于他们"' },
+                { id: 89, trans: false, emotion: '负面', bullied: '否', quote: '"就因为她是残疾人，面对她，我就没资格生气"' }, { id: 90, trans: false, emotion: '正面', bullied: '否', quote: '17岁；单亲家庭；青春期敏感叛逆，现在很爱妈妈' }, { id: 91, trans: false, emotion: '矛盾', bullied: '未提及', quote: '大四；讨厌同情；交流能力很差，敏感自卑；想让大家多了解这样的家庭' },
+                { id: 92, trans: false, emotion: '正面', bullied: '未提及', quote: '手语自然习得；沟通有点困难' }, { id: 93, trans: true, emotion: '正面', bullied: '未提及', quote: '手语自然习得；说话晚；觉得没什么' }, { id: 94, trans: false, emotion: '负面', bullied: '未提及', quote: '"我成年了，毕业工作了，还是走不出来，很自卑"' },
+                { id: 95, trans: false, emotion: '正面', bullied: '是', quote: '被嘲笑过，但是不在意；"我从不后悔做他们的孩子"' }, { id: 96, trans: false, emotion: '矛盾', bullied: '是', quote: '小学被嘲笑过；"希望社会能给聋哑人一点尊重"' }, { id: 97, trans: false, emotion: '正面', bullied: '否', quote: '没什么自卑心理；"非常希望残疾人能得到平等的对待"' },
+                { id: 98, trans: false, emotion: '负面', bullied: '未提及', quote: '"从小长大还是有点自卑的"' }, { id: 99, trans: false, emotion: '正面', bullied: '否', quote: '姥姥奶奶带大；只会简单手语；"因为不会手语感到愧疚"' }, { id: 100, trans: false, emotion: '矛盾', bullied: '是', quote: '高中；从小自卑；家庭氛围抑郁；"对未来还是充满希望"' },
+                { id: 101, trans: false, emotion: '正面', bullied: '否', quote: '"我爸妈对我真的超好！""我超骄傲我有一个这样的妈妈"' }, { id: 102, trans: false, emotion: '正面', bullied: '未提及', quote: '"生活过的很快乐，阳光！"' }, { id: 103, trans: false, emotion: '未提及', bullied: '未提及', quote: '"真的很希望医院都能配备一个懂手语的人"' },
+                { id: 104, trans: false, emotion: '正面', bullied: '未提及', quote: '小时候很在意，大学才开始释怀；"我想自己偷偷去学手语"' }, { id: 105, trans: false, emotion: '正面', bullied: '未提及', quote: '"全天下最爱我的父母"；很惭愧没有为聋人群体做什么' }, { id: 106, trans: false, emotion: '正面', bullied: '是', quote: '手语自然习得；小学被孤立嘲笑；依然很爱父母' },
+                { id: 107, trans: false, emotion: '正面', bullied: '是', quote: '单亲家庭；小学被霸凌，勇敢反击；"希望爸爸身体健康"' }, { id: 108, trans: true, emotion: '未提及', bullied: '未提及', quote: '爷爷奶奶带大；不怎么跟聋人父亲交流' }, { id: 109, trans: false, emotion: '负面', bullied: '未提及', quote: '自卑；家庭氛围压抑' },
+                { id: 110, trans: false, emotion: '矛盾', bullied: '未提及', quote: '全家都不会手语；有时候觉得不是滋味，有点自卑' }, { id: 111, trans: false, emotion: '正面', bullied: '未提及', quote: '13岁；打跑歧视父母的小孩；"我生活还挺快乐的"' }, { id: 112, trans: false, emotion: '正面', bullied: '未提及', quote: '母亲就医困难"我还是觉得我妈妈是最好的妈妈"' },
+                { id: 113, trans: false, emotion: '未提及', bullied: '是', quote: '对路人的围观感到不舒服' }, { id: 114, trans: false, emotion: '正面', bullied: '未提及', quote: '母亲接放学被小学生嘲笑；"感谢她辛辛苦苦把我养大"' }, { id: 115, trans: false, emotion: '正面', bullied: '未提及', quote: '"我非常以她为傲，因为她生下了如此优秀的我"' },
+                { id: 116, trans: true, emotion: '正面', bullied: '未提及', quote: '从未因母亲是聋人而感到自卑和怯弱；很小就开始当家' }, { id: 117, trans: false, emotion: '正面', bullied: '未提及', quote: '小时候有些自卑；初高中后认为"CODA挺酷的"；手语翻译' }, { id: 118, trans: false, emotion: '正面', bullied: '未提及', quote: '成长中有过困扰，但是坚持自己的想法；正视自己；执业医生听力师' },
+                { id: 119, trans: true, emotion: '正面', bullied: '未提及', quote: '手语为第一语言；三四岁就开始帮家里买油盐；幼儿园老师' }, { id: 120, trans: true, emotion: '正面', bullied: '未提及', quote: '7岁代表全家签合同；开了一家无声火锅店，为三十余名听障者提供岗位' }, { id: 121, trans: false, emotion: '正面', bullied: '是', quote: '小学自卑被嘲笑；抱怨"我为什么要出生在这样一个家庭里"；大学后慢慢接受' },
+                { id: 122, trans: false, emotion: '正面', bullied: '未提及', quote: '39岁；34岁才正式学手语；"我愿意牺牲换取父母能够听能够说"；保险' }, { id: 123, trans: true, emotion: '正面', bullied: '未提及', quote: '小时候在意别人的看法；中学接受自己的身份，敞开心扉；社工&手语传译员' }
+            ];
+
+            // ========== 滚动动画 ==========
+            const revealElements = document.querySelectorAll('.reveal');
+            function checkReveal() {
+                const windowHeight = window.innerHeight;
+                const revealPoint = windowHeight * 0.88;
+                const hidePoint = windowHeight * 0.08;
+                revealElements.forEach(el => {
+                    const rect = el.getBoundingClientRect();
+                    const elTop = rect.top;
+                    const elBottom = rect.bottom;
+                    if (elTop < revealPoint && elBottom > hidePoint) {
+                        el.classList.add('visible');
+                    } else if (elBottom < hidePoint || elTop > revealPoint) {
+                        el.classList.remove('visible');
+                    }
+                });
+            }
+            function updateScrollProgress() {
+                const scrollTop = window.scrollY;
+                const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+                document.getElementById('scrollProgress').style.width = Math.min(progress, 100) + '%';
+            }
+            let ticking = false;
+            window.addEventListener('scroll', () => {
+                if (!ticking) { requestAnimationFrame(() => { checkReveal(); updateScrollProgress(); ticking = false; }); ticking = true; }
+            }, { passive: true });
+            setTimeout(() => { checkReveal(); updateScrollProgress(); }, 300);
+            window.addEventListener('load', () => { setTimeout(() => { checkReveal(); updateScrollProgress(); }, 500); });
+
+            // ========== 情绪统计 ==========
+            let pos = 0, neg = 0, mix = 0, unk = 0;
+            realPeople.forEach(p => { if (p.emotion === '正面') pos++; else if (p.emotion === '负面') neg++; else if (p.emotion === '矛盾') mix++; else unk++; });
+            const total = 123;
+            document.getElementById('positiveCount').innerText = `${pos}人(${(pos/total*100).toFixed(1)}%)`;
+            document.getElementById('negativeCount').innerText = `${neg}人(${(neg/total*100).toFixed(1)}%)`;
+            document.getElementById('mixedCount').innerText = `${mix}人(${(mix/total*100).toFixed(1)}%)`;
+            document.getElementById('unknownCount').innerText = `${unk}人(${(unk/total*100).toFixed(1)}%)`;
+
+            const positiveBar = document.getElementById('positiveBar');
+            const negativeBar = document.getElementById('negativeBar');
+            const mixedBar = document.getElementById('mixedBar');
+            const unknownBar = document.getElementById('unknownBar');
+            const emotionObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        positiveBar.style.width = `${pos/total*100}%`; positiveBar.innerText = pos;
+                        negativeBar.style.width = `${neg/total*100}%`; negativeBar.innerText = neg;
+                        mixedBar.style.width = `${mix/total*100}%`; mixedBar.innerText = mix;
+                        unknownBar.style.width = `${unk/total*100}%`; unknownBar.innerText = unk;
+                    } else {
+                        positiveBar.style.width = '0%'; positiveBar.innerText = '0';
+                        negativeBar.style.width = '0%'; negativeBar.innerText = '0';
+                        mixedBar.style.width = '0%'; mixedBar.innerText = '0';
+                        unknownBar.style.width = '0%'; unknownBar.innerText = '0';
+                    }
+                });
+            }, { threshold: 0.3 });
+            const emotionBarsContainer = document.querySelector('.emotion-chart');
+            if (emotionBarsContainer) emotionObserver.observe(emotionBarsContainer);
+
+            // ========== 人员网格 ==========
+            const gridDiv = document.getElementById('peopleGridFull');
+            realPeople.forEach(p => {
+                let d = document.createElement('div');
+                d.className = 'person-icon';
+                if (p.trans) d.classList.add('person-translator');
+                if (p.emotion === '正面') d.classList.add('emotion-positive');
+                else if (p.emotion === '负面') d.classList.add('emotion-negative');
+                else if (p.emotion === '矛盾') d.classList.add('emotion-mixed');
+                d.textContent = p.id;
+                d.onclick = () => {
+                    document.getElementById('modalContent').innerHTML = `<h3>CODA #${p.id}</h3><p>翻译者：${p.trans?'是':'未提及'}</p><p>情绪：${p.emotion}</p><p>霸凌：${p.bullied}</p><div class="modal-quote">"${p.quote}"</div>`;
+                    document.getElementById('globalModal').classList.add('active');
+                };
+                gridDiv.appendChild(d);
+            });
+
+            // ========== 场景网络图 ==========
+            const sceneCanvas = document.getElementById('sceneCanvas');
+            const sceneContainer = document.getElementById('sceneNetworkContainer');
+            const sceneTooltip = document.getElementById('sceneTooltip');
+            const sceneNodesData = [
+                { id: "🏠 日常", size: 19, color: "#FF6B6B", description: "超市、点菜、问路等家庭翻译", insight: "最常见的翻译场景" },
+                { id: "🏥 医疗", size: 6, color: "#FECA57", description: "看病、手术、就医翻译", insight: "重大责任场景" },
+                { id: "🏛️ 政务", size: 2, color: "#FF9F43", description: "合同、社保、政府手续翻译", insight: "" },
+                { id: "💳 银行", size: 3, color: "#6F1E51", description: "柜台业务、贷款翻译", insight: "" },
+                { id: "⚖️ 法律", size: 1, color: "#54A0FF", description: "法律事务、合同纠纷翻译", insight: "" },
+                { id: "🏫 学校", size: 2, color: "#4ECDC4", description: "家长会、学校沟通翻译", insight: "" },
+                { id: "❓ 未指明", size: 5, color: "#A3CB38", description: "提及翻译但未说明场景", insight: "" }
+            ];
+            const sceneLinksData = [
+                { s: 0, t: 1, st: 17 }, { s: 0, t: 4, st: 9 }, { s: 1, t: 4, st: 8 }, { s: 0, t: 3, st: 15 },
+                { s: 3, t: 1, st: 10 }, { s: 0, t: 2, st: 11 }, { s: 1, t: 5, st: 9 }, { s: 0, t: 5, st: 5 },
+                { s: 2, t: 1, st: 3 }, { s: 3, t: 2, st: 3 }, { s: 0, t: 6, st: 6 }, { s: 1, t: 6, st: 2 },
+                { s: 5, t: 6, st: 2 }, { s: 3, t: 5, st: 2 }
+            ];
+            let sceneHoveredNode = null;
+            let sceneDraggedNode = null;
+            let sceneMouseDown = false;
+            function resizeScene() {
+                const rect = sceneContainer.getBoundingClientRect();
+                sceneCanvas.width = rect.width;
+                sceneCanvas.height = rect.height;
+                initScenePositions();
+            }
+            function initScenePositions() {
+                const cx = sceneCanvas.width / 2, cy = sceneCanvas.height / 2, rad = Math.min(sceneCanvas.width, sceneCanvas.height) * 0.35;
+                sceneNodesData.forEach((n, idx) => {
+                    const a = (idx / sceneNodesData.length) * Math.PI * 2;
+                    n.x = cx + Math.cos(a) * rad + (Math.random() - 0.5) * 20;
+                    n.y = cy + Math.sin(a) * rad + (Math.random() - 0.5) * 20;
+                    n.vx = 0; n.vy = 0; n.radius = Math.sqrt(n.size) * 2.5 + 12;
+                });
+            }
+            function simulateScene() {
+                sceneNodesData.forEach(n => { if (!n.fixed) { n.fx = 0; n.fy = 0; } });
+                for (let i = 0; i < sceneNodesData.length; i++)
+                    for (let j = i + 1; j < sceneNodesData.length; j++) {
+                        const a = sceneNodesData[i], b = sceneNodesData[j];
+                        const dx = b.x - a.x, dy = b.y - a.y, dist = Math.hypot(dx, dy) || 0.01;
+                        const minD = a.radius + b.radius + 56;
+                        if (dist < minD) { const force = (minD - dist) * 0.48; if (!a.fixed) { a.fx -= (dx / dist) * force; a.fy -= (dy / dist) * force; } if (!b.fixed) { b.fx += (dx / dist) * force; b.fy += (dy / dist) * force; } }
+                    }
+                sceneLinksData.forEach(lk => {
+                    const a = sceneNodesData[lk.s], b = sceneNodesData[lk.t];
+                    const dx = b.x - a.x, dy = b.y - a.y, dist = Math.hypot(dx, dy) || 0.01;
+                    const ideal = 118 + (lk.st * 1.05);
+                    if (dist > ideal) { const force = (dist - ideal) * 0.019 * (lk.st / 8.5); if (!a.fixed) { a.fx += (dx / dist) * force; a.fy += (dy / dist) * force; } if (!b.fixed) { b.fx -= (dx / dist) * force; b.fy -= (dy / dist) * force; } }
+                });
+                sceneNodesData.forEach(n => {
+                    if (!n.fixed) { n.vx = (n.vx + n.fx) * 0.91; n.vy = (n.vy + n.fy) * 0.91; n.x += n.vx; n.y += n.vy; const m = n.radius + 45; n.x = Math.min(sceneCanvas.width - m, Math.max(m, n.x)); n.y = Math.min(sceneCanvas.height - m, Math.max(m, n.y)); }
+                });
+            }
+            function updateSceneTooltip(e, node) {
+                if (node) {
+                    const idx = sceneNodesData.indexOf(node);
+                    const linkCount = sceneLinksData.filter(l => l.s === idx || l.t === idx).length;
+                    let html = `<strong>${node.id}</strong>📌 提及人数: ${node.size} 人<br>🔗 关联场景: ${linkCount} 个<br>💬 ${node.description}`;
+                    if (node.insight) html += `<br><span style="font-size: 11px; opacity:0.85;">✨ ${node.insight}</span>`;
+                    sceneTooltip.innerHTML = html;
+                    sceneTooltip.style.opacity = '1';
+                    const containerRect = sceneContainer.getBoundingClientRect();
+                    sceneTooltip.style.left = (e.clientX - containerRect.left + 16) + 'px';
+                    sceneTooltip.style.top = (e.clientY - containerRect.top - 18) + 'px';
+                } else { sceneTooltip.style.opacity = '0'; }
+            }
+            function drawScene() {
+                const ctx = sceneCanvas.getContext('2d');
+                ctx.clearRect(0, 0, sceneCanvas.width, sceneCanvas.height);
+                sceneLinksData.forEach(lk => { const a = sceneNodesData[lk.s], b = sceneNodesData[lk.t]; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.strokeStyle = 'rgba(105,125,165,0.4)'; ctx.lineWidth = 1.5; ctx.stroke(); });
+                if (sceneHoveredNode) {
+                    const hidx = sceneNodesData.indexOf(sceneHoveredNode);
+                    sceneLinksData.forEach(lk => { if (lk.s === hidx || lk.t === hidx) { const a = sceneNodesData[lk.s], b = sceneNodesData[lk.t]; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.strokeStyle = '#FFB74D'; ctx.lineWidth = 3.5; ctx.shadowBlur = 5; ctx.stroke(); } });
+                    ctx.shadowBlur = 0;
+                }
+                sceneNodesData.forEach(n => {
+                    const isHover = n === sceneHoveredNode;
+                    ctx.beginPath(); ctx.arc(n.x, n.y, n.radius, 0, Math.PI * 2); ctx.fillStyle = n.color; ctx.fill();
+                    ctx.strokeStyle = isHover ? '#FFECAA' : '#ffffffcc'; ctx.lineWidth = isHover ? 3 : 2; ctx.stroke();
+                    ctx.fillStyle = '#fff'; ctx.font = `bold ${Math.min(16, Math.floor(n.radius / 2.5))}px "Segoe UI"`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(n.size, n.x, n.y - 2);
+                    ctx.font = `bold ${Math.min(10, Math.floor(n.radius / 3.5))}px "Segoe UI"`; ctx.fillText('人', n.x, n.y + 10);
+                    ctx.font = '500 12px "Segoe UI"'; ctx.fillStyle = '#2b2a27'; ctx.fillText(n.id.split(' ')[0], n.x, n.y + n.radius + 12);
+                });
+            }
+            sceneCanvas.addEventListener('mousemove', (e) => {
+                const rect = sceneCanvas.getBoundingClientRect(); const sx = sceneCanvas.width / rect.width, sy = sceneCanvas.height / rect.height;
+                const mx = (e.clientX - rect.left) * sx, my = (e.clientY - rect.top) * sy;
+                if (sceneMouseDown && sceneDraggedNode) { sceneDraggedNode.x = mx; sceneDraggedNode.y = my; sceneDraggedNode.vx = 0; sceneDraggedNode.vy = 0; return; }
+                let newHover = null;
+                for (let i = sceneNodesData.length - 1; i >= 0; i--) { const n = sceneNodesData[i]; if (Math.hypot(mx - n.x, my - n.y) < n.radius) { newHover = n; break; } }
+                if (newHover !== sceneHoveredNode) { sceneHoveredNode = newHover; updateSceneTooltip(e, newHover); }
+                if (sceneHoveredNode) updateSceneTooltip(e, sceneHoveredNode);
+            });
+            sceneCanvas.addEventListener('mousedown', (e) => {
+                sceneMouseDown = true;
+                const rect = sceneCanvas.getBoundingClientRect(); const sx = sceneCanvas.width / rect.width, sy = sceneCanvas.height / rect.height;
+                const mx = (e.clientX - rect.left) * sx, my = (e.clientY - rect.top) * sy;
+                for (let i = sceneNodesData.length - 1; i >= 0; i--) { const n = sceneNodesData[i]; if (Math.hypot(mx - n.x, my - n.y) < n.radius) { sceneDraggedNode = n; sceneDraggedNode.fixed = true; sceneCanvas.style.cursor = 'grabbing'; break; } }
+            });
+            window.addEventListener('mouseup', () => { if (sceneDraggedNode) { sceneDraggedNode.fixed = false; sceneDraggedNode = null; } sceneMouseDown = false; sceneCanvas.style.cursor = 'default'; });
+            sceneCanvas.addEventListener('mouseleave', () => { sceneHoveredNode = null; sceneTooltip.style.opacity = '0'; if (sceneDraggedNode) sceneDraggedNode.fixed = false; sceneDraggedNode = null; sceneMouseDown = false; });
+            window.addEventListener('resize', () => { resizeScene(); });
+            resizeScene();
+            function animateScene() { simulateScene(); drawScene(); requestAnimationFrame(animateScene); }
+            animateScene();
+
+            // ========== 霸凌饼图 ==========
+            const bullyYes = realPeople.filter(p => p.bullied === '是').length;
+            const bullyNo = realPeople.filter(p => p.bullied === '否').length;
+            const bullyUnk = realPeople.filter(p => p.bullied === '未提及').length;
+            const bullyChart = echarts.init(document.getElementById('bullyChart'));
+            bullyChart.setOption({
+                backgroundColor: 'transparent',
+                tooltip: { trigger: 'item', backgroundColor: 'rgba(0,0,0,0.7)', borderColor: '#d6b17e', formatter: '{b}: {d}% ({c}人)' },
+                series: [{ type: 'pie', radius: ['45%', '70%'], center: ['50%', '50%'],
+                    data: [
+                        { value: bullyYes, name: '遭受霸凌', itemStyle: { color: '#e07a5f', borderWidth: 2, borderColor: '#fff' } },
+                        { value: bullyNo, name: '明确未被霸凌', itemStyle: { color: '#81b29a', borderWidth: 2, borderColor: '#fff' } },
+                        { value: bullyUnk, name: '未提及', itemStyle: { color: '#b8a793', borderWidth: 2, borderColor: '#fff' } }
+                    ],
+                    label: { show: true, formatter: '{b}\n{d}%', color: '#4a3725', fontSize: 12 },
+                    labelLine: { lineStyle: { color: '#d6b17e' } }, emphasis: { scale: true }
+                }]
+            });
+
+            // ========== 情感词汇网络图 ==========
+            const emotionDataFull = [
+                { word: '希望', count: 54, emotion: '希望' }, { word: '爱', count: 53, emotion: '爱' }, { word: '喜欢', count: 50, emotion: '爱' }, { word: '自卑', count: 48, emotion: '自卑' },
+                { word: '开心', count: 32, emotion: '快乐' }, { word: '害怕', count: 23, emotion: '恐惧' }, { word: '担心', count: 21, emotion: '焦虑' }, { word: '尴尬', count: 17, emotion: '尴尬' },
+                { word: '快乐', count: 16, emotion: '快乐' }, { word: '满足', count: 15, emotion: '满足' }, { word: '委屈', count: 14, emotion: '委屈' }, { word: '无奈', count: 14, emotion: '无助' },
+                { word: '压力', count: 13, emotion: '压力' }, { word: '感谢', count: 13, emotion: '感恩' }, { word: '难过', count: 13, emotion: '悲伤' }, { word: '骄傲', count: 12, emotion: '自豪' },
+                { word: '孤独', count: 12, emotion: '孤独' }, { word: '舒服', count: 11, emotion: '轻松' }, { word: '感动', count: 9, emotion: '感恩' }, { word: '矛盾', count: 9, emotion: '矛盾' },
+                { word: '期待', count: 8, emotion: '希望' }, { word: '无助', count: 7, emotion: '无助' }, { word: '自豪', count: 6, emotion: '自豪' }, { word: '感恩', count: 6, emotion: '感恩' },
+                { word: '放心', count: 6, emotion: '安心' }, { word: '不好意思', count: 6, emotion: '尴尬' }, { word: '高兴', count: 6, emotion: '快乐' }, { word: '期望', count: 6, emotion: '希望' },
+                { word: '悲伤', count: 6, emotion: '悲伤' }, { word: '兴奋', count: 5, emotion: '快乐' }, { word: '热爱', count: 5, emotion: '爱' }, { word: '关爱', count: 5, emotion: '爱' },
+                { word: '生气', count: 5, emotion: '愤怒' }, { word: '珍惜', count: 5, emotion: '爱' }, { word: '疼爱', count: 5, emotion: '爱' }, { word: '踏实', count: 5, emotion: '安心' },
+                { word: '愉快', count: 5, emotion: '快乐' }, { word: '愤怒', count: 4, emotion: '愤怒' }, { word: '压抑', count: 4, emotion: '压力' }, { word: '沉重', count: 4, emotion: '压力' },
+                { word: '失落', count: 4, emotion: '失落' }, { word: '渴望', count: 4, emotion: '希望' }, { word: '早熟', count: 4, emotion: '家庭责任' }, { word: '孤单', count: 4, emotion: '孤独' },
+                { word: '惭愧', count: 3, emotion: '羞耻' }, { word: '负担', count: 3, emotion: '压力' }, { word: '轻松', count: 3, emotion: '轻松' }, { word: '累', count: 3, emotion: '疲惫' },
+                { word: '向往', count: 3, emotion: '希望' }, { word: '平静', count: 3, emotion: '安心' }, { word: '纠结', count: 3, emotion: '矛盾' }, { word: '爱护', count: 3, emotion: '爱' },
+                { word: '恼火', count: 3, emotion: '愤怒' }, { word: '无力', count: 3, emotion: '无助' }
+            ];
+            const emotionColorsFull = { '希望': '#4ecdc4', '爱': '#feca57', '自卑': '#ff6b6b', '快乐': '#feca57', '恐惧': '#54a0ff', '焦虑': '#ff9f43', '尴尬': '#ff9f43', '满足': '#feca57', '委屈': '#ff9f43', '无助': '#ee5a24', '压力': '#54a0ff', '感恩': '#00d2d3', '悲伤': '#ff9ff3', '自豪': '#4ecdc4', '孤独': '#96ceb4', '轻松': '#48dbfb', '矛盾': '#ff9f43', '安心': '#1dd1a1', '愤怒': '#ff3838', '失落': '#ff9ff3', '家庭责任': '#5f27cd', '羞耻': '#c44569', '疲惫': '#ee5a24' };
+            let currentMinCount = 1, showLabels = true;
+            let emotionChart = echarts.init(document.getElementById('emotionGraph'));
+            function updateEmotionChart() {
+                const filtered = emotionDataFull.filter(w => w.count >= currentMinCount);
+                document.getElementById('displayWordsCount').innerText = filtered.length;
+                document.getElementById('totalWordsCount').innerText = emotionDataFull.length;
+                const sorted = [...filtered].sort((a, b) => b.count - a.count);
+                const nodes = [], edges = [];
+                sorted.forEach((item, idx) => {
+                    const t = idx / sorted.length, r = 80 + (280 - 80) * Math.pow(t, 0.7), angle = (idx / sorted.length) * Math.PI * 2;
+                    nodes.push({ id: idx.toString(), name: item.word, value: item.count, x: Math.cos(angle) * r, y: Math.sin(angle) * r, symbolSize: 8 + Math.min(item.count / 54 * 22, 22), itemStyle: { color: emotionColorsFull[item.emotion] || '#c9af87', borderColor: '#fff', borderWidth: 1.2 }, label: { show: showLabels, position: r > 180 ? 'right' : 'top', formatter: '{b}', color: '#4a3725', fontSize: 9 + Math.min(item.count / 25, 4), backgroundColor: 'rgba(250,247,240,0.85)', borderRadius: 12, padding: [2, 5] }, emotion: item.emotion, colorValue: emotionColorsFull[item.emotion] || '#c9af87' });
+                });
+                const groups = {};
+                nodes.forEach((n, idx) => { if (!groups[n.colorValue]) groups[n.colorValue] = []; groups[n.colorValue].push(idx); });
+                Object.keys(groups).forEach(color => { const idxs = groups[color]; for (let i = 0; i < idxs.length; i++) for (let j = i + 1; j < Math.min(i + 3, idxs.length); j++) edges.push({ source: idxs[i].toString(), target: idxs[j].toString(), lineStyle: { color: color, width: 0.6, opacity: 0.3, curveness: 0.1 } }); });
+                emotionChart.setOption({ series: [{ data: nodes, links: edges, label: { show: showLabels }, lineStyle: { color: 'source', curveness: 0.1, opacity: 0.3, width: 0.8 } }] }, false);
+            }
+            emotionChart.setOption({ backgroundColor: 'transparent', toolbox: { show: true, feature: { saveAsImage: { title: '保存图片' } }, right: 20, top: 10, iconStyle: { borderColor: '#d6b17e' } }, tooltip: { trigger: 'item', backgroundColor: 'rgba(0,0,0,0.7)', borderColor: '#d6b17e', formatter: (params) => { if (params.dataType === 'node') return `<strong>${params.name}</strong><br/>出现次数: ${params.value}`; return params.name; } }, series: [{ type: 'graph', layout: 'none', roam: false, draggable: false, zoom: 1, lineStyle: { color: 'source', curveness: 0.1, opacity: 0.3, width: 0.8 }, emphasis: { focus: 'adjacency', label: { show: true, fontSize: 12 }, lineStyle: { width: 2, opacity: 0.8 }, itemStyle: { borderColor: '#d4a017', borderWidth: 2 } } }] });
+            updateEmotionChart();
+            document.getElementById('countSlider').oninput = function() { currentMinCount = parseInt(this.value); document.getElementById('currentCountVal').innerText = currentMinCount; updateEmotionChart(); };
+            document.getElementById('showLabelsCheckbox').onchange = function() { showLabels = this.checked; updateEmotionChart(); };
+            window.addEventListener('resize', () => { emotionChart.resize(); if (careerChart) careerChart.resize(); });
+
+            // ========== 职业气泡图 - 纵向版本 ==========
+            const careerChart = echarts.init(document.getElementById('careerChart'));
+            const careerData = [
+                { name: '手语翻译', count: 3, relevance: 0.98, desc: '直接将童年翻译经验转化为职业' },
+                { name: '手语律师', count: 1, relevance: 0.95, desc: '法律领域的手语专业服务' },
+                { name: '手语传译员', count: 2, relevance: 0.93, desc: '专业手语传译工作' },
+                { name: '手语戏剧表演', count: 1, relevance: 0.90, desc: '通过艺术形式传播手语文化' },
+                { name: '特殊教育工作', count: 1, relevance: 0.85, desc: '服务特殊需要儿童' },
+                { name: '执业医生听力师', count: 1, relevance: 0.80, desc: '医学领域，服务聋人群体' },
+                { name: '幼儿园老师', count: 2, relevance: 0.70, desc: '教育行业，可能与早期经历相关' },
+                { name: '无声火锅店翻译', count: 1, relevance: 0.55, desc: '跨界创业，仍与聋人服务相关' },
+                { name: '图书馆志愿者', count: 1, relevance: 0.40, desc: '公共服务，关联较弱' },
+                { name: '美食博主', count: 1, relevance: 0.30, desc: '与CODA经历无明显关联' },
+                { name: '金融', count: 1, relevance: 0.15, desc: '完全无关领域' },
+                { name: '保险', count: 1, relevance: 0.10, desc: '完全无关领域' }
+            ];
+
+            // 构建纵向散点数据：[x偏移, 相关度(y轴), 人数, 名称, 描述]
+            const scatterData = careerData.map((item, idx) => {
+                // 横向轻微散开，避免标签重叠
+                const xOffset = (idx % 2 === 0 ? 0.15 : -0.12) + (Math.sin(idx * 1.8) * 0.08);
+                return [xOffset, item.relevance, item.count, item.name, item.desc];
+            });
+
+            careerChart.setOption({
+                backgroundColor: 'transparent',
+                tooltip: {
+                    trigger: 'item',
+                    backgroundColor: 'rgba(0,0,0,0.75)',
+                    borderColor: '#d6b17e',
+                    formatter: (p) => `<strong>${p.data[3]}</strong><br/>🟡 从业人数: ${p.data[2]} 人<br/>📍 相关度: ${(p.data[1]*100).toFixed(0)}%<br/>💬 ${p.data[4]}`
+                },
+                // Y轴：相关度（从下到上递增）
+                yAxis: {
+                    type: 'value',
+                    name: '↗ 与CODA经历相关度递增',
+                    nameLocation: 'middle',
+                    nameGap: 45,
+                    min: -0.05,
+                    max: 1.05,
+                    splitLine: { lineStyle: { color: '#e8e0d4', width: 1, type: 'dashed' } },
+                    axisLabel: {
+                        formatter: (v) => {
+                            if (v === 0) return '0%';
+                            if (v === 0.25) return '25%';
+                            if (v === 0.5) return '50%';
+                            if (v === 0.75) return '75%';
+                            if (v === 1) return '100%';
+                            return '';
+                        },
+                        color: '#7a6248'
+                    },
+                    axisLine: { lineStyle: { color: '#d6b17e' } },
+                    axisTick: { show: false }
+                },
+                // X轴：仅用于横向散开
+                xAxis: {
+                    type: 'value',
+                    show: false,
+                    min: -0.5,
+                    max: 0.5
+                },
+                grid: { left: '15%', right: '15%', top: '5%', bottom: '8%' },
+                series: [{
+                    type: 'scatter',
+                    data: scatterData,
+                    symbolSize: (val) => Math.min(Math.max(val[2] * 14 + 10, 20), 60),
+                    itemStyle: {
+                        color: (p) => {
+                            const rel = p.data[1];
+                            if (rel >= 0.9) return '#d4a017';
+                            if (rel >= 0.8) return '#c49a6c';
+                            if (rel >= 0.6) return '#b8895a';
+                            if (rel >= 0.4) return '#9e7b5a';
+                            return '#8a7a6a';
+                        },
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    },
+                    label: {
+                        show: true,
+                        formatter: (p) => p.data[3],
+                        position: 'right',
+                        offset: [8, 0],
+                        color: '#4a3725',
+                        fontSize: 11,
+                        fontWeight: 500
+                    }
+                }]
+            });
+
+                        // ========== 弹窗 ==========
+            const modal = document.getElementById('globalModal');
+            document.getElementById('modalCloseBtn').onclick = () => modal.classList.remove('active');
+            modal.onclick = (e) => { if (e.target === modal) modal.classList.remove('active'); };
+
+            // ========== 音频播放 ==========
+            // 背景音乐（自动循环播放，旁白时不暂停）
+            const bgMusic = new Audio('音乐.mp3');
+            bgMusic.loop = true;
+            bgMusic.volume = 0.3;
+            
+            // 尝试自动播放
+            bgMusic.play().then(() => {
+                console.log('背景音乐已自动播放');
+            }).catch(() => {
+                document.addEventListener('click', function autoPlayBg() {
+                    bgMusic.play().catch(() => {});
+                }, { once: true });
+            });
+
+            // 章节旁白音频映射
+            const chapterAudioMap = {
+                'hero': '一.mp3',
+                '1': '二.mp3',
+                '2': '三.mp3',
+                '3': '四.mp3',
+                '4': '五.mp3',
+                '5': '六.mp3',
+                '6': '七.mp3',
+                '7': '结尾诗.mp3'
+            };
+
+            // 存储每个章节对应的音频对象
+            const audioInstances = {};
+            let currentPlayingKey = null;
+
+            function getAudio(key) {
+                if (!audioInstances[key]) {
+                    const fileName = chapterAudioMap[key];
+                    if (!fileName) return null;
+                    const audio = new Audio(fileName);
+                    audio.onended = () => {
+                        audio.currentTime = 0;
+                        currentPlayingKey = null;
+                    };
+                    audioInstances[key] = audio;
+                }
+                return audioInstances[key];
+            }
+
+            function toggleChapterAudio(chapterKey) {
+                const audio = getAudio(chapterKey);
+                if (!audio) return;
+
+                if (currentPlayingKey && currentPlayingKey !== chapterKey) {
+                    const prevAudio = audioInstances[currentPlayingKey];
+                    if (prevAudio) {
+                        prevAudio.pause();
+                        prevAudio.currentTime = 0;
+                    }
+                    currentPlayingKey = null;
+                }
+
+                if (audio.paused) {
+                    audio.play().catch(() => {});
+                    currentPlayingKey = chapterKey;
+                } else {
+                    audio.pause();
+                    currentPlayingKey = null;
+                }
+            }
+
+            function autoPlayChapter(chapterKey) {
+                if (currentPlayingKey === chapterKey) return;
+                const audio = getAudio(chapterKey);
+                if (!audio) return;
+                if (currentPlayingKey && currentPlayingKey !== chapterKey) {
+                    const prevAudio = audioInstances[currentPlayingKey];
+                    if (prevAudio) {
+                        prevAudio.pause();
+                        prevAudio.currentTime = 0;
+                    }
+                }
+                audio.currentTime = 0;
+                audio.play().catch(() => {});
+                currentPlayingKey = chapterKey;
+            }
+
+            document.getElementById('playHeroAudio')?.addEventListener('click', () => {
+                toggleChapterAudio('hero');
+            });
+
+            document.querySelectorAll('.play-chapter-audio').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const chapter = btn.getAttribute('data-chapter');
+                    toggleChapterAudio(chapter);
+                });
+            });
+
+            // ========== 滚动自动播放 ==========
+            const chapters = document.querySelectorAll('.chapter');
+            chapters.forEach((chapterEl, index) => {
+                chapterEl.setAttribute('data-chapter', String(index + 1));
+            });
+
+            const heroSection = document.querySelector('.hero');
+            if (heroSection) {
+                heroSection.setAttribute('data-chapter', 'hero');
+            }
+
+            let hasAutoPlayed = {};
+
+            const chapterObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const chapterKey = entry.target.getAttribute('data-chapter');
+                    if (!chapterKey || !chapterAudioMap[chapterKey]) return;
+
+                    if (entry.isIntersecting && !hasAutoPlayed[chapterKey]) {
+                        hasAutoPlayed[chapterKey] = true;
+                        autoPlayChapter(chapterKey);
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            chapters.forEach(chapterEl => {
+                chapterObserver.observe(chapterEl);
+            });
+            if (heroSection) {
+                chapterObserver.observe(heroSection);
+            }
+
+            // 监听结尾诗区域
+            const endingSection = document.querySelector('.ending-poem');
+            if (endingSection) {
+                endingSection.setAttribute('data-chapter', '7');
+                chapterObserver.observe(endingSection);
+            }
+
+            // ========== 页面加载时自动播放 hero ==========
+
+            // ========== 页面加载时自动播放 hero ==========
+            function tryAutoPlayHero() {
+                if (bgMusic.paused) {
+                    bgMusic.play().catch(() => {});
+                }
+                if (!hasAutoPlayed['hero']) {
+                    hasAutoPlayed['hero'] = true;
+                    autoPlayChapter('hero');
+                }
+            }
+
+            setTimeout(() => {
+                tryAutoPlayHero();
+            }, 300);
+
+            document.addEventListener('click', function playOnFirstClick() {
+                if (bgMusic.paused) {
+                    bgMusic.play().catch(() => {});
+                }
+                tryAutoPlayHero();
+            }, { once: true });
+
+            // 如果浏览器阻止了自动播放，等用户第一次点击后再播
+            document.addEventListener('click', function playOnFirstClick() {
+                if (bgMusic.paused) {
+                    bgMusic.play().catch(() => {});
+                }
+                if (currentPlayingKey !== 'hero') {
+                    // 检查 hero 是否在视口内
+                    if (heroSection) {
+                        const heroRect = heroSection.getBoundingClientRect();
+                        const windowHeight = window.innerHeight;
+                        if (heroRect.top < windowHeight && heroRect.bottom > 0) {
+                            autoPlayChapter('hero');
+                            lastAutoPlayedChapter = 'hero';
+                        }
+                    }
+                }
+            }, { once: true });
+
+            // ========== 弹幕墙 ==========
+            const bulletContainer = document.getElementById('bullet-container');
+            if (bulletContainer) {
+                const bulletSentences = [
+                    "我真的很幸福也很幸运", "我们只是换了一种沟通的方式罢了", "父母对我的爱一点也不少",
+                    "（父母）给我的爱非常非常的满", "没什么大不了的", "我知道她把一切的一切都给了我",
+                    "我从不后悔做他们的孩子", "希望我能用我的双手去帮助他们", "希望能成为推动这两个世界融合的力量",
+                    "真的很希望医院都能配备一个懂手语的人", "从小都是在背负一个翻译者的角色",
+                    "也许我们这样的孩子天生就肩负着帮助聋人与健听人群沟通的使命", "同学经常叫我小哑巴",
+                    "一切只能依靠自己", "什么都是一个人去做", "没有期待，不会被爱，我的家庭不快乐",
+                    "我不接受自己是聋人家庭的孩子", "没有童年，没有叛逆期", "想当个孤儿", "总感觉自己和别人不一样",
+                    "沟通是像一座大山一样的障碍，越不过去", "我为什么要出生在这样一个家庭里，为什么我要承受这些"
+                ];
+                const bulletColors = ['#FF9AA2', '#FFB7B2', '#FFDAC1', '#E2F0CB', '#B5EAD7', '#C7CEEA', '#D8A7B1',
+                    '#A8E6CF', '#DCEDC1', '#FFD3B6', '#FF8B94', '#FFAAA5', '#D4A5A5', '#9C89B8', '#F0A6CA', '#B8BEDD'
+                ];
+                let bulletsArray = [];
+                const rowHeight = 36;
+                function getRowCount() { return Math.max(4, Math.floor(bulletContainer.clientHeight / rowHeight)); }
+                function getBestRow() {
+                    const rows = getRowCount();
+                    const occupancy = new Array(rows).fill(0);
+                    bulletsArray.forEach(b => { if (b.row < rows) occupancy[b.row]++; });
+                    let bestRow = 0, minOcc = Infinity;
+                    for (let i = 0; i < rows; i++) { if (occupancy[i] < minOcc) { minOcc = occupancy[i]; bestRow = i; } }
+                    return bestRow;
+                }
+                function createBullet(text) {
+                    const div = document.createElement('div');
+                    div.textContent = text;
+                    div.style.position = 'absolute'; div.style.whiteSpace = 'nowrap'; div.style.fontWeight = '500';
+                    div.style.fontSize = '16px'; div.style.color = bulletColors[Math.floor(Math.random() * bulletColors.length)];
+                    div.style.textShadow = '0 1px 2px rgba(0,0,0,0.1)'; div.style.opacity = '0.9';
+                    div.style.transition = 'opacity 0.2s ease'; div.style.cursor = 'pointer'; div.style.zIndex = '20';
+                    div.style.background = 'rgba(250,247,240,0.7)'; div.style.padding = '2px 12px';
+                    div.style.borderRadius = '30px'; div.style.backdropFilter = 'blur(4px)';
+                    div.style.fontFamily = "system-ui, 'Segoe UI', 'Noto Sans SC', 'PingFang SC', 'Helvetica Neue', sans-serif";
+                    div.style.boxShadow = '0 1px 4px rgba(0,0,0,0.08)';
+                    const row = getBestRow(); const topPos = row * rowHeight + 5;
+                    div.style.top = topPos + 'px'; div.style.left = bulletContainer.clientWidth + 'px';
+                    const bulletObj = { element: div, text, row, top: topPos, startTime: Date.now(), duration: 6000 + Math.random() * 4000 };
+                    bulletContainer.appendChild(div); bulletsArray.push(bulletObj);
+                    div.onclick = (e) => { e.stopPropagation(); div.style.opacity = '0'; setTimeout(() => { const idx = bulletsArray.findIndex(b => b.element === div); if (idx !== -1) bulletsArray.splice(idx, 1); if (div.parentNode) div.parentNode.removeChild(div); }, 200); };
+                    return bulletObj;
+                }
+                function animateBullets() {
+                    const now = Date.now(); const containerW = bulletContainer.clientWidth;
+                    for (let i = bulletsArray.length - 1; i >= 0; i--) {
+                        const b = bulletsArray[i]; const elapsed = now - b.startTime;
+                        const progress = Math.min(elapsed / b.duration, 1);
+                        const startX = containerW; const endX = -b.element.offsetWidth;
+                        const curX = startX - (startX - endX) * progress;
+                        const floatY = Math.sin(now / 800 + i) * 3;
+                        b.element.style.left = curX + 'px'; b.element.style.top = (b.top + floatY) + 'px';
+                        if (progress >= 1) {
+                            if (b.element.parentNode) b.element.parentNode.removeChild(b.element);
+                            bulletsArray.splice(i, 1);
+                        }
+                    }
+                    if (bulletsArray.length < 10 && Math.random() < 0.045) {
+                        createBullet(bulletSentences[Math.floor(Math.random() * bulletSentences.length)]);
+                    }
+                    requestAnimationFrame(animateBullets);
+                }
+                setTimeout(() => { for (let i = 0; i < 5; i++) { setTimeout(() => createBullet(bulletSentences[i % bulletSentences.length]), i * 300); } }, 200);
+                animateBullets();
+            }
+        })();
+    </script>
+</body>
+</html>
